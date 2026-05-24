@@ -26,25 +26,13 @@ namespace system_utils {
 
   template<typename T>
   void inline do_not_optimize(T const& value) {
-    #if defined (_GNU_SOURCE)
+    #if defined (__GNUC__) || defined(__clang__)
       asm volatile("" : : "r,m"(value) : "memory");
     #elif defined (WINDOWS)
       [[maybe_unused]] char const volatile *dummy = reinterpret_cast<char const volatile*>(&value);
       (void)dummy;
       _ReadWriteBarrier();
     #endif
-  }
-
-  template<typename Fn>
-  void inline preapare_for_measurement(Fn &&fn){
-    long long x {};
-    system_utils::do_not_optimize(x);
-    auto begin_time = std::chrono::steady_clock::now();
-    while ((std::chrono::steady_clock::now() - begin_time) <
-        std::chrono::milliseconds(5)) {
-      fn();
-      x++;
-    }
   }
 
   // current configuration based on personal hardware TODO: generalization
@@ -122,7 +110,7 @@ namespace system_utils {
         throw std::runtime_error(std::strerror(res));
       }
     #elif defined(WINDOWS)
-      DWORD_PTR mask {static_cast<DWORD_PTR>(1) << core_id};
+      DWORD_PTR mask {static_cast<DWORD_PTR>(1) << logical_core_id};
       if (0 == (res = SetThreadAffinityMask(GetCurrentThread(), mask))){
         throw std::runtime_error(std::strerror(res));
      }
