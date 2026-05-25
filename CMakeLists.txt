@@ -16,6 +16,7 @@ add_executable(main
   source/main.cpp
   source/utils/timer.cpp
   source/utils/event_manager.cpp
+  source/utils/run_manager.cpp
 )
 
 # CMAKE_CURRENT_SOURCE_DIR: builtin variable for full path of source directory
