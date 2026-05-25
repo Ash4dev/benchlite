@@ -20,7 +20,6 @@
 
 #include <initializer_list>
 #include <span>
-#include <string>
 #include <string_view>
 
 #include <cstddef>
@@ -79,7 +78,7 @@ namespace experiments {
         std::size_t warmup_runs = 3,
         std::size_t measured_runs = 20);
 
-    void flush_to_csv(std::string const& file_name);
+    void flush_to_csv(std::filesystem::path const&file_name);
   };
 }
 
@@ -145,16 +144,16 @@ namespace experiments {
   }
 
   template<event_manager::Main_BM_Cat Scenarios>
-  void Experiment_Descriptor<Scenarios>::flush_to_csv(std::string const &file_name){
+  void Experiment_Descriptor<Scenarios>::flush_to_csv(std::filesystem::path const &file_name){
 
     std::filesystem::path p{file_name};
-    std::filesystem::path dir {p.parent_path()};
+    std::filesystem::path dir {"run/temp"};
 
-    if ((not std::filesystem::exists(dir)) and (not dir.empty())){
+    if ((not std::filesystem::exists(dir)) or (not dir.empty())){
       std::filesystem::create_directories(dir);
     }
 
-    std::ofstream csv_file(file_name, std::ios::out); // directly opens
+    std::ofstream csv_file(dir / file_name, std::ios::out); // directly opens
     if (not csv_file.is_open()) {
       std::cerr << "Error: Could not open file " << file_name << " for writing.\n";
       return;
